@@ -1,0 +1,69 @@
+import random
+from requests import get
+from bs4 import BeautifulSoup as Soup
+import pandas
+import numpy as np
+import pandas as pd
+import numpy
+import re
+#from imdb import IMDb
+import cgi,os
+
+df = pandas.read_csv('data.tsv', sep='\t')
+
+
+
+
+
+
+#ia = IMDb()
+#for genre in movie['genres']:
+#        print(genre)
+#        continue
+
+iyi_filmler = df[(df.averageRating > 7) & (df.numVotes > 10_000)]
+#toplam_oy=df[df.averageRating > 7]
+#avg_ratingi_7_den_yuksek_olanlar = toplam_oy[df.numVotes > 50000]
+
+
+
+
+
+
+while True: 
+    random_bir_eleman = iyi_filmler.sample(n=1)
+    random_elemanin_tconst_degeri = random_bir_eleman["tconst"].item()
+    ad=("https://www.imdb.com/title/")
+    birles=(ad+str(random_elemanin_tconst_degeri))
+    url=get(birles)
+    request=url.text
+    soup_data=Soup(request,'html.parser')
+    imdb_puani=soup_data.find('span',{'itemprop':'ratingValue'}).text
+    yenitconst=random_elemanin_tconst_degeri.replace('tt','')
+    #movie = ia.get_movie(yenitconst)
+    y=soup_data.find('span',{'id':'titleYear'})
+    ulke=soup_data.find(href=re.compile("country")).text
+    
+    if y is not None:
+        y=soup_data.find('span',{'id':'titleYear'}).a.text
+        y=int(y)
+    else:
+        continue
+    if ulke!="India" and y > 1980 and 'TV' not in soup_data.title.text and 'Episode' not in soup_data.title.text and 'Video' not in soup_data.title.text:
+        break
+
+
+
+            
+poster=soup_data.find('div',{'class':'poster'}).a.img['src']
+
+
+            
+print(birles)
+print(soup_data.title.text)
+print(imdb_puani)
+print(poster)
+print(ulke)
+
+import webbrowser
+webbrowser.open(birles, new=0)
